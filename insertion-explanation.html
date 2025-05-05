@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insertion Sort Explanation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      background-color: #f0f0f0;
+      color: #222;
+      text-align: left;
+      padding: 4rem 2rem 2rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #6dd5ed, #2193b0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 1rem 0;
+      line-height: 1.8;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .array-box {
+      display: flex;
+      gap: 10px;
+      margin-top: 2rem;
+      justify-content: center;
+    }
+
+    .bar {
+      padding: 1rem;
+      background: #2193b0;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: bold;
+      width: 40px;
+      text-align: center;
+      transition: transform 0.5s;
+    }
+
+    .highlight {
+      background-color: #6dd5ed;
+      color: #222;
+    }
+
+    .step-btn {
+      margin-top: 2rem;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      background: linear-gradient(to right, #6dd5ed, #2193b0);
+      color: #222;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .step-btn:hover {
+      opacity: 0.9;
+    }
+
+    #explanation {
+      margin-top: 2rem;
+      font-style: italic;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Insertion Sort Explained</h1>
+    <p>
+      Insertion sort builds the final sorted array one item at a time. It’s much like sorting playing cards in your hands —
+      you pick one card at a time and insert it into its correct position.
+    </p>
+    <p>
+      Each element is compared with the one on its left, and if it's smaller, it shifts the larger element right until the correct spot is found.
+      This way, the sorted portion of the array grows with each step.
+    </p>
+    <p>
+      This algorithm is simple and intuitive, but not the most efficient for large datasets. It works well for small arrays or when the array is already partially sorted.
+      Insertion sort has a time complexity of O(n²) in the worst case and O(n) in the best case when the array is already sorted.
+    </p>
+    <p>Here’s a small example sorting the array <strong>[5, 3, 4, 1, 2]</strong>:</p>
+
+    <div class="array-box" id="arrayBox">
+      <div class="bar">5</div>
+      <div class="bar">3</div>
+      <div class="bar">4</div>
+      <div class="bar">1</div>
+      <div class="bar">2</div>
+    </div>
+
+    <button class="step-btn" onclick="nextStep()">Next Step</button>
+    <button class="step-btn" onclick="resetSort()">Reset</button>
+
+    <p id="explanation"></p>
+
+    <script>
+      const originalArray = [5, 3, 4, 1, 2];
+      let array = [...originalArray];
+      let i = 1;
+
+      function nextStep() {
+        if (i >= array.length) {
+          document.getElementById('explanation').textContent = 'Array is fully sorted!';
+          return;
+        }
+
+        let key = array[i];
+        let j = i - 1;
+        let steps = `Looking to insert ${key}. Comparing with elements to its left.`;
+
+        while (j >= 0 && array[j] > key) {
+          array[j + 1] = array[j];
+          j--;
+        }
+        array[j + 1] = key;
+
+        steps += ` Placed ${key} at position ${j + 1}. Now the first ${i + 1} elements are sorted.`;
+
+        updateArray();
+        document.getElementById('explanation').textContent = steps;
+        i++;
+      }
+
+      function updateArray() {
+        const arrayBox = document.getElementById('arrayBox');
+        arrayBox.innerHTML = '';
+        array.forEach((num, idx) => {
+          const bar = document.createElement('div');
+          bar.className = 'bar';
+          if (idx === i) bar.classList.add('highlight');
+          bar.textContent = num;
+          arrayBox.appendChild(bar);
+        });
+      }
+
+      function resetSort() {
+        array = [...originalArray];
+        i = 1;
+        updateArray();
+        document.getElementById('explanation').textContent = '';
+      }
+
+      updateArray();
+    </script>
+  </div>
+</body>
+</html>

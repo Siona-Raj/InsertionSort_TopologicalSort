@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Depth-First Search (DFS) Algorithm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #d3d3d3;
+      color: #333;
+      font-family: 'Fira Code', monospace;
+      padding: 2rem;
+      font-size: 1rem;
+    }
+
+    .keyword { color: #569CD6; }
+    .function { color: #DCDCAA; }
+    .variable { color: #9CDCFE; }
+    .comment { color: #6A9955; font-style: italic; }
+
+    .code-box {
+      background-color: #2e2e2e;
+      color: #d4d4d4;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>Depth-First Search (DFS) - Pseudocode</h2>
+  <div class="code-box">
+    <pre><code>
+<span class="function">DFS</span>(<span class="variable">node</span>, <span class="variable">visited</span>):
+    <span class="keyword">if</span> <span class="variable">node</span> <span class="keyword">in</span> <span class="variable">visited</span>:
+        <span class="keyword">return</span>
+
+    <span class="function">visit</span>(<span class="variable">node</span>)
+    <span class="variable">visited</span>.add(<span class="variable">node</span>)
+
+    <span class="keyword">for</span> <span class="variable">neighbor</span> <span class="keyword">in</span> <span class="function">adjacentNodes</span>(<span class="variable">node</span>):
+        <span class="function">DFS</span>(<span class="variable">neighbor</span>, <span class="variable">visited</span>)
+    </code></pre>
+  </div>
+
+  <h3>Explanation</h3>
+  <p>
+    Depth-First Search (DFS) is a graph traversal algorithm that explores as far as possible along each branch before backtracking:
+    <ul>
+      <li>Start from a selected node.</li>
+      <li>Mark it as visited and perform any required operation (like printing).</li>
+      <li>Recursively visit each unvisited neighbor.</li>
+      <li>This process continues until all reachable nodes are visited.</li>
+      <li>DFS is typically implemented using recursion or a stack.</li>
+    </ul>
+  </p>
+</body>
+</html>
+

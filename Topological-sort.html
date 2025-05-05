@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Topological Sort Visualizer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      background-color: #d3d3d3;
+      color: #222;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #6dd5ed, #2193b0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    input[type="text"] {
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: none;
+      width: 300px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      padding: 0.8rem 1.5rem;
+      margin: 0.5rem;
+      font-size: 1rem;
+      border: none;
+      background: linear-gradient(to right, #6dd5ed, #2193b0);
+      color: #222;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    svg {
+      margin-top: 2rem;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+    }
+
+    .error {
+      color: #ff4d4d;
+      margin-top: 0.5rem;
+    }
+
+    #sortedPath {
+      margin-top: 1rem;
+      color: #003f5c;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    #dfsStack {
+      color: #ff7c43;
+      font-weight: bold;
+      margin-top: 1.5rem;
+      font-size: 1rem;
+    }
+
+    #stackVisual, #arrayVisual {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+      gap: 10px;
+    }
+
+    #arrayLabel {
+      color: #003f5c;
+      font-weight: bold;
+      margin-top: 2rem;
+      font-size: 1rem;
+    }
+
+    .stack-box, .array-box {
+      background-color: #ffd580;
+      color: #222;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: transform 0.3s ease;
+    }
+
+    .array-box {
+      background-color: #b0e0ff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Topological Sort Visualizer</h1>
+  <input type="text" id="inputGraph" placeholder="Enter edges like A B,B C" />
+  <div id="errorMessage" class="error"></div>
+  <br/>
+  <button onclick="buildGraphStepByStep()">Build Graph</button>
+  <button onclick="startTopoSort()">Start Sort</button>
+  <button onclick="nextTopoStep()">Next Step</button>
+  <button onclick="autoPlayTopo()">Auto Play</button>
+  <button onclick="resetTopoSort()">Reset</button>
+  <svg id="graphSVG" width="100%" height="600"></svg>
+  <div id="sortedPath"></div>
+  <div id="dfsStack"><strong>DFS Stack:</strong></div>
+  <div id="stackVisual"></div>
+  <div id="arrayLabel">Popped Elements:</div>
+  <div id="arrayVisual"></div>
+  <script>
+    let graph = {};
+    let sortedOrder = [];
+    let topoSteps = [];
+    let topoStepIndex = 0;
+    let autoPlayTopoInterval;
+    let positions = {};
+    let buildSteps = [], buildIndex = 0, buildInterval;
+    let graphReady = false;
+
+    function buildGraphStepByStep() {
+      const input = document.getElementById("inputGraph").value;
+      const errorDiv = document.getElementById("errorMessage");
+      document.getElementById("sortedPath").textContent = "";
+      errorDiv.textContent = "";
+      document.getElementById("stackVisual").innerHTML = "";
+      document.getElementById("arrayVisual").innerHTML = "";
+      graph = {};
+      sortedOrder = [];
+      topoSteps = [];
+      topoStepIndex = 0;
+      buildSteps = [];
+      buildIndex = 0;
+      graphReady = false;
+      clearInterval(autoPlayTopoInterval);
+      clearInterval(buildInterval);
+
+      try {
+        const edges = input.split(',');
+        edges.forEach(edge => {
+          const [from, to] = edge.trim().split(' ');
+          if (!from || !to) throw new Error();
+          buildSteps.push([from, to]);
+        });
+        buildInterval = setInterval(buildStep, 700);
+      } catch {
+        errorDiv.textContent = "Invalid input. Please use format A B,B C";
+      }
+    }
+
+    function buildStep() {
+      if (buildIndex >= buildSteps.length) {
+        clearInterval(buildInterval);
+        generate2DPositions();
+        renderGraph([]);
+        graphReady = true;
+        return;
+      }
+      const [from, to] = buildSteps[buildIndex];
+      if (!graph[from]) graph[from] = [];
+      if (!graph[to]) graph[to] = [];
+      if (!graph[from].includes(to)) {
+        graph[from].push(to);
+      }
+      buildIndex++;
+      generate2DPositions();
+      renderGraph([]);
+    }
+
+    function startTopoSort() {
+      const errorDiv = document.getElementById("errorMessage");
+      errorDiv.textContent = "";
+      if (!graphReady) {
+        errorDiv.textContent = "Please build the graph first.";
+        return;
+      }
+
+      sortedOrder = [];
+      topoSteps = [];
+      topoStepIndex = 0;
+      clearInterval(autoPlayTopoInterval);
+
+      const visited = new Set();
+      const tempGraph = JSON.parse(JSON.stringify(graph));
+      let hasCycle = false;
+
+      const dfs = (node, visiting) => {
+        if (visiting.has(node)) {
+          hasCycle = true;
+          return;
+        }
+        if (visited.has(node)) return;
+
+        visiting.add(node);
+        topoSteps.push({ sorted: [...sortedOrder], stack: Array.from(visiting) });
+        updateStack(visiting);
+
+        for (const neighbor of tempGraph[node]) {
+          dfs(neighbor, visiting);
+          if (hasCycle) return;
+        }
+
+        visiting.delete(node);
+        topoSteps.push({ sorted: [...sortedOrder], stack: Array.from(visiting) });
+        updateStack(visiting);
+
+        visited.add(node);
+        sortedOrder.push(node);
+        topoSteps.push({ sorted: [...sortedOrder], stack: Array.from(visiting) });
+      };
+
+      for (const node in tempGraph) {
+        if (!visited.has(node)) {
+          dfs(node, new Set());
+        }
+      }
+
+      if (hasCycle) {
+        errorDiv.textContent = "Cycle detected. Topological sort not possible.";
+        return;
+      }
+
+      sortedOrder.reverse();
+      document.getElementById("sortedPath").textContent = `Sorted Path: ${sortedOrder.join(' → ')}`;
+      topoStepIndex = 0;
+      nextTopoStep();
+    }
+
+    function nextTopoStep() {
+      if (!graphReady || topoStepIndex >= topoSteps.length) return;
+      const step = topoSteps[topoStepIndex];
+      renderGraph(step.sorted);
+      updateStack(step.stack);
+      updateArray(step.sorted);
+      topoStepIndex++;
+    }
+
+    function autoPlayTopo() {
+      if (!graphReady) return;
+      clearInterval(autoPlayTopoInterval);
+      autoPlayTopoInterval = setInterval(() => {
+        if (topoStepIndex >= topoSteps.length) {
+          clearInterval(autoPlayTopoInterval);
+        } else {
+          nextTopoStep();
+        }
+      }, 1500);
+    }
+
+    function resetTopoSort() {
+      clearInterval(autoPlayTopoInterval);
+      clearInterval(buildInterval);
+      topoStepIndex = 0;
+      graphReady = false;
+      document.getElementById("errorMessage").textContent = "";
+      renderGraph([]);
+      document.getElementById("sortedPath").textContent = "";
+      document.getElementById("stackVisual").innerHTML = "";
+      document.getElementById("arrayVisual").innerHTML = "";
+    }
+
+    function generate2DPositions() {
+      const nodes = Object.keys(graph);
+      const cols = Math.ceil(Math.sqrt(nodes.length));
+      const spacingX = 150, spacingY = 150;
+
+      const svg = document.getElementById("graphSVG");
+      const svgWidth = svg.clientWidth;
+      const svgHeight = svg.clientHeight;
+
+      const totalWidth = (cols - 1) * spacingX;
+      const rows = Math.ceil(nodes.length / cols);
+      const totalHeight = (rows - 1) * spacingY;
+
+      const offsetX = (svgWidth - totalWidth) / 2;
+      const offsetY = (svgHeight - totalHeight) / 2;
+
+      positions = {};
+      nodes.forEach((node, i) => {
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+        positions[node] = {
+          x: offsetX + col * spacingX,
+          y: offsetY + row * spacingY,
+        };
+      });
+    }
+
+    function renderGraph(highlighted) {
+      const svg = document.getElementById("graphSVG");
+      svg.innerHTML = "";
+
+      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      defs.innerHTML = `
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L9,3 z" fill="#ccc" />
+        </marker>`;
+      svg.appendChild(defs);
+
+      for (const from in graph) {
+        for (const to of graph[from]) {
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", positions[from].x);
+          line.setAttribute("y1", positions[from].y);
+          line.setAttribute("x2", positions[to].x);
+          line.setAttribute("y2", positions[to].y);
+          line.setAttribute("stroke", "#ccc");
+          line.setAttribute("stroke-width", "2");
+          line.setAttribute("marker-end", "url(#arrow)");
+          svg.appendChild(line);
+        }
+      }
+
+      for (const node in positions) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", positions[node].x);
+        circle.setAttribute("cy", positions[node].y);
+        circle.setAttribute("r", 20);
+        circle.setAttribute("fill", highlighted.includes(node) ? "#6dd5ed" : "#2193b0");
+        svg.appendChild(circle);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", positions[node].x);
+        text.setAttribute("y", positions[node].y + 5);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("font-size", "16");
+        text.setAttribute("fill", "#f5f5f5");
+        text.textContent = node;
+        svg.appendChild(text);
+      }
+    }
+
+    function updateStack(stack) {
+      const stackArray = Array.isArray(stack) ? stack : Array.from(stack);
+
+      const stackContainer = document.getElementById("stackVisual");
+      stackContainer.innerHTML = "";
+
+      stackArray.forEach(item => {
+        const box = document.createElement("div");
+        box.className = "stack-box";
+        box.textContent = item;
+        stackContainer.appendChild(box);
+      });
+    }
+
+    function updateArray(array) {
+      const arrayContainer = document.getElementById("arrayVisual");
+      arrayContainer.innerHTML = "";
+
+      array.forEach(item => {
+        const box = document.createElement("div");
+        box.className = "array-box";
+        box.textContent = item;
+        arrayContainer.appendChild(box);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Insertion Sort Quiz</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      background-color: #f0f0f0;
+      color: #222;
+      padding: 2rem;
+    }
+
+    .quiz-container {
+      background-color: #fff;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      background: linear-gradient(135deg, #6dd5ed, #2193b0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .question-container {
+      display: none;
+    }
+
+    .question {
+      font-size: 1.3rem;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    .options button {
+      background-color: #2193b0;
+      border: none;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      text-align: left;
+      transition: background 0.3s;
+    }
+
+    .options button:hover {
+      background-color: #6dd5ed;
+      color: #222;
+    }
+
+    .result {
+      margin-top: 1rem;
+      font-weight: bold;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+
+    .score {
+      margin-top: 2rem;
+      font-size: 1.4rem;
+      color: #ff9800;
+      text-align: center;
+    }
+
+    .navigation {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .navigation button {
+      background: linear-gradient(to right, #6dd5ed, #2193b0);
+      color: #222;
+      font-weight: bold;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .navigation button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>Test Your Knowledge: Insertion Sort</h1>
+
+    <div class="question-container" id="question0">
+      <div class="question">What is the worst-case time complexity of Insertion Sort?</div>
+      <div class="options">
+        <button onclick="checkAnswer(this, false)">O(n)</button>
+        <button onclick="checkAnswer(this, true)">O(n<sup>2</sup>)</button>
+        <button onclick="checkAnswer(this, false)">O(log n)</button>
+        <button onclick="checkAnswer(this, false)">O(n log n)</button>
+      </div>
+    </div>
+
+    <div class="question-container" id="question1">
+      <div class="question">What is the best-case time complexity of Insertion Sort?</div>
+      <div class="options">
+        <button onclick="checkAnswer(this, false)">O(n<sup>2</sup>)</button>
+        <button onclick="checkAnswer(this, true)">O(n)</button>
+        <button onclick="checkAnswer(this, false)">O(log n)</button>
+        <button onclick="checkAnswer(this, false)">O(n log n)</button>
+      </div>
+    </div>
+
+    <div class="question-container" id="question2">
+      <div class="question">Which of the following is true about Insertion Sort?</div>
+      <div class="options">
+        <button onclick="checkAnswer(this, false)">It is not stable</button>
+        <button onclick="checkAnswer(this, false)">It is a non-comparison sort</button>
+        <button onclick="checkAnswer(this, true)">It sorts in-place</button>
+        <button onclick="checkAnswer(this, false)">It uses recursion</button>
+      </div>
+    </div>
+
+    <div class="question-container" id="question3">
+      <div class="question">What kind of input gives Insertion Sort its best performance?</div>
+      <div class="options">
+        <button onclick="checkAnswer(this, true)">Sorted input</button>
+        <button onclick="checkAnswer(this, false)">Reverse sorted input</button>
+        <button onclick="checkAnswer(this, false)">Random input</button>
+        <button onclick="checkAnswer(this, false)">Large input</button>
+      </div>
+    </div>
+
+    <div class="question-container" id="question4">
+      <div class="question">Which of these sorting algorithms is most similar to Insertion Sort in terms of concept?</div>
+      <div class="options">
+        <button onclick="checkAnswer(this, true)">Selection Sort</button>
+        <button onclick="checkAnswer(this, false)">Merge Sort</button>
+        <button onclick="checkAnswer(this, false)">Heap Sort</button>
+        <button onclick="checkAnswer(this, false)">Quick Sort</button>
+      </div>
+    </div>
+
+    <div class="result" id="result"></div>
+    <div class="score" id="score"></div>
+
+    <div class="navigation">
+      <button onclick="prevQuestion()">Previous</button>
+      <button onclick="nextQuestion()">Next</button>
+    </div>
+  </div>
+
+  <script>
+    let currentQuestion = 0;
+    const totalQuestions = 5;
+    let score = 0;
+    let answered = Array(totalQuestions).fill(false);
+
+    function showQuestion(index) {
+      for (let i = 0; i < totalQuestions; i++) {
+        document.getElementById(`question${i}`).style.display = 'none';
+      }
+      document.getElementById(`question${index}`).style.display = 'block';
+      document.getElementById('result').textContent = '';
+      document.getElementById('score').textContent = '';
+    }
+
+    function nextQuestion() {
+      if (currentQuestion < totalQuestions - 1) {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+      } else {
+        document.getElementById('score').textContent = `🎉 You scored ${score} out of ${totalQuestions}!`;
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        showQuestion(currentQuestion);
+      }
+    }
+
+    function checkAnswer(button, isCorrect) {
+      const result = document.getElementById('result');
+      if (!answered[currentQuestion]) {
+        if (isCorrect) {
+          result.textContent = "✅ Correct!";
+          result.style.color = '#4caf50';
+          score++;
+        } else {
+          result.textContent = "❌ Incorrect. Try again!";
+          result.style.color = '#f44336';
+        }
+        answered[currentQuestion] = true;
+      }
+    }
+
+    showQuestion(currentQuestion);
+  </script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Insertion Sort</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      background-color: #d3d3d3;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #004aad;
+      font-size: 2.5rem;
+      margin-top: 2rem;
+    }
+
+    main {
+      padding: 2rem;
+      text-align: center;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    input[type="text"] {
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 300px;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      margin: 1rem 0.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #0077cc;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    .bars {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      height: 300px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      margin: 2rem auto 1rem;
+      padding: 1rem;
+      overflow-x: auto;
+      gap: 10px;
+    }
+
+    .bar {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      width: 50px;
+      background-color: #004aad;
+      border-radius: 8px 8px 0 0;
+      position: relative;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .bar.inserting {
+      background-color: #ff8800 !important;
+    }
+
+    .bar-label {
+      margin-top: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #000;
+    }
+
+    .array-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 1rem;
+    }
+
+    .array-element {
+      background-color: #004aad;
+      color: white;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .array-element.inserting {
+      background-color: #ff8800 !important;
+      color: #000;
+    }
+
+    .error {
+      color: #ff4d4d;
+      margin-top: 0.5rem;
+    }
+
+    #stepDescription {
+      font-size: 1rem;
+      margin-top: 1rem;
+      color: #333;
+      min-height: 1.5em;
+    }
+
+    .slider-container {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      font-size: 1rem;
+    }
+
+    input[type="range"] {
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Insertion Sort</h1>
+    <input type="text" id="inputArray" placeholder="Enter numbers separated by commas" />
+    <div id="errorMessage" class="error"></div>
+    <br/>
+    <button onclick="startSort()">Start Sort</button>
+    <button onclick="nextStep()">Next Step</button>
+    <button onclick="autoPlay()">Auto Play</button>
+    <button onclick="resetSort()">Reset</button>
+
+    <div class="slider-container">
+      <label for="speedRange">Speed:</label>
+      <input type="range" id="speedRange" min="100" max="2000" value="500" step="100" />
+      <span id="speedValue">500ms</span>
+    </div>
+
+    <div class="bars" id="barContainer"></div>
+    <div class="array-container" id="arrayDisplay"></div>
+    <div id="stepDescription"></div>
+  </main>
+
+  <script>
+    let array = [];
+    let steps = [];
+    let descriptions = [];
+    let stepIndex = 0;
+    let autoPlayInterval;
+    let stepStates = [];
+    let isAutoPlaying = false;
+
+    function startSort() {
+      const input = document.getElementById("inputArray").value;
+      const errorDiv = document.getElementById("errorMessage");
+      errorDiv.textContent = "";
+      document.getElementById("stepDescription").textContent = "";
+
+      const parsed = input.split(',').map(str => str.trim()).map(Number);
+      if (parsed.some(isNaN)) {
+        errorDiv.textContent = "Please enter valid numbers separated by commas.";
+        return;
+      }
+
+      array = parsed;
+      steps = [];
+      descriptions = [];
+      stepStates = [];
+      stepIndex = 0;
+      clearInterval(autoPlayInterval);
+      isAutoPlaying = false;
+      generateSteps(array);
+      render(array, "Starting array. Click 'Next Step' to begin sorting.");
+    }
+
+    function generateSteps(arr) {
+      let copy = [...arr];
+      for (let i = 1; i < copy.length; i++) {
+        let j = i;
+        descriptions.push(`Start sorting element ${copy[i]} at index ${i}.`);
+        steps.push([...copy]);
+        stepStates.push({ inserting: j });
+
+        while (j > 0 && copy[j - 1] > copy[j]) {
+          [copy[j], copy[j - 1]] = [copy[j - 1], copy[j]];
+          j--;
+          descriptions.push(`Moved ${copy[j]} left.`);
+          steps.push([...copy]);
+          stepStates.push({ inserting: j });
+        }
+      }
+    }
+
+    function render(arr, description = "") {
+      const container = document.getElementById("barContainer");
+      const arrayContainer = document.getElementById("arrayDisplay");
+      container.innerHTML = "";
+      arrayContainer.innerHTML = "";
+      const maxVal = Math.max(...arr);
+
+      const state = stepStates[stepIndex] || {};
+
+      arr.forEach((val, idx) => {
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        if (idx === state.inserting) bar.classList.add("inserting");
+        bar.style.height = `${(val / maxVal) * 100}%`;
+
+        const label = document.createElement("div");
+        label.className = "bar-label";
+        label.innerText = val;
+
+        bar.appendChild(label);
+        container.appendChild(bar);
+
+        const arrayElem = document.createElement("div");
+        arrayElem.className = "array-element";
+        arrayElem.textContent = val;
+        if (idx === state.inserting) arrayElem.classList.add("inserting");
+        arrayContainer.appendChild(arrayElem);
+      });
+
+      document.getElementById("stepDescription").textContent = description;
+    }
+
+    function nextStep() {
+      if (stepIndex < steps.length) {
+        render(steps[stepIndex], descriptions[stepIndex]);
+        stepIndex++;
+      }
+    }
+
+    function autoPlay() {
+      clearInterval(autoPlayInterval);
+      isAutoPlaying = true;
+      runAutoPlay();
+    }
+
+    function runAutoPlay() {
+      if (!isAutoPlaying) return;
+      const speed = parseInt(document.getElementById("speedRange").value, 10);
+      if (stepIndex < steps.length) {
+        render(steps[stepIndex], descriptions[stepIndex]);
+        stepIndex++;
+        autoPlayInterval = setTimeout(runAutoPlay, speed);
+      } else {
+        isAutoPlaying = false;
+      }
+    }
+
+    function resetSort() {
+      clearInterval(autoPlayInterval);
+      isAutoPlaying = false;
+      array = [];
+      steps = [];
+      descriptions = [];
+      stepStates = [];
+      stepIndex = 0;
+      document.getElementById("barContainer").innerHTML = "";
+      document.getElementById("arrayDisplay").innerHTML = "";
+      document.getElementById("stepDescription").textContent = "";
+      document.getElementById("inputArray").value = "";
+      document.getElementById("errorMessage").textContent = "";
+    }
+
+    document.getElementById("speedRange").addEventListener("input", function () {
+      document.getElementById("speedValue").textContent = `${this.value}ms`;
+    });
+  </script>
+</body>
+</html>

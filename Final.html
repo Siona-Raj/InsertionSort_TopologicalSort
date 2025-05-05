@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sorting Visualizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Syncopate&family=Rubik+Glitch&family=Pacifico&family=IM+Fell+English+SC&family=Quicksand&family=Raleway:wght@500&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: #d3d3d3;
+      color: #333;
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: #333;
+      font-weight: bold;
+      font-style: normal;
+      text-transform: none;
+      font-family: 'Quicksand';
+    }
+
+    .container {
+      display: flex;
+      height: 100%;
+      flex: 1;
+    }
+
+    .sidebar {
+      width: 200px;
+      background-color: #c0c0c0;
+      display: flex;
+      flex-direction: column;
+      padding-top: 2rem;
+      border-right: 2px solid #aaa;
+    }
+
+    .tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      background-color: #d3d3d3;
+      border: none;
+      color: #333;
+      transition: background 0.3s;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1.2rem;
+      text-align: left;
+      width: 100%;
+    }
+
+    .tab:hover,
+    .tab.active {
+      background: #aaa;
+    }
+
+    .main-content {
+      flex: 1;
+      height: 100%;
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    .dropdown {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dropdown-content {
+      display: none;
+      flex-direction: column;
+      background-color: #e0e0e0;
+      padding-left: 1rem;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: flex;
+    }
+
+    .dropdown-content button {
+      background: none;
+      border: none;
+      color: #333;
+      padding: 0.5rem 0;
+      text-align: left;
+      font-size: 1rem;
+      font-family: 'Quicksand', sans-serif;
+      cursor: pointer;
+    }
+
+    .dropdown-content button:hover {
+      background-color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>TRACE</h1>
+  </header>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="dropdown">
+        <button class="tab">Insertion Sort</button>
+        <div class="dropdown-content">
+          <button onclick="switchTab('insertion-procedure')">Procedure and Explanation</button>
+          <button onclick="switchTab('insertion-try')">Try it Yourself</button>
+          <button onclick="switchTab('insertion-quiz')">Quiz</button>
+          <button onclick="switchTab('insertion-algo')">Algorithm</button>
+        </div>
+      </div>
+
+      <div class="dropdown">
+        <button class="tab">Topological Sort</button>
+        <div class="dropdown-content">
+          <button onclick="switchTab('topological-procedure')">Procedure and Explanation</button>
+          <button onclick="switchTab('topological-try')">Try it Yourself</button>
+          <button onclick="switchTab('topological-quiz')">Quiz</button>
+          <button onclick="switchTab('topological-algo')">Algorithm</button>
+        </div>
+      </div>
+
+      <button class="tab" onclick="switchTab('Home')">Home</button>
+    </div>
+
+    <div class="main-content">
+      <iframe id="contentFrame" src="Home.html"></iframe>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tab) {
+      const frame = document.getElementById("contentFrame");
+
+      switch(tab) {
+        case 'insertion-procedure':
+          frame.src = "insertion-explanation.html";
+          break;
+        case 'insertion-try':
+          frame.src = "Insertion-sort.html";
+          break;
+        case 'insertion-quiz':
+          frame.src = "insertion-quiz.html";
+          break;
+        case 'insertion-algo':
+          frame.src = "insertalgo.html";
+          break;
+        case 'topological-procedure':
+          frame.src = "topo-explanation.html";
+          break;
+        case 'topological-try':
+          frame.src = "Topological-sort.html";
+          break;
+        case 'topological-quiz':
+          frame.src = "topo-quiz.html";
+          break;
+        case 'topological-algo':
+          frame.src = "topoalgo.html";
+          break;
+        case 'Home':
+          frame.src = "Home.html";
+          break;
+      }
+    }
+  </script>
+</body>
+</html>

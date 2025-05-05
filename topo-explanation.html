@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topological Sort Explanation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      text-align: left;
+      padding: 4rem 2rem 2rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #66ccff, #004aad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 1rem 0;
+      line-height: 1.8;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .graph-container {
+      position: relative;
+      margin-top: 2rem;
+      height: 250px;
+    }
+
+    .node {
+      background: #004aad;
+      padding: 1rem;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      position: absolute;
+      transition: background 0.3s ease;
+    }
+
+    .edge {
+      position: absolute;
+      height: 2px;
+      background-color: #66ccff;
+      transform-origin: left;
+    }
+
+    .step-btn {
+      margin-top: 2rem;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      background: linear-gradient(to right, #66ccff, #004aad);
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0, 74, 173, 0.4);
+    }
+
+    .step-btn:hover {
+      opacity: 0.9;
+    }
+
+    #explanation {
+      margin-top: 2rem;
+      font-style: italic;
+      color: #ffcc33;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Topological Sort Explained</h1>
+    <p>
+      Topological sorting for Directed Acyclic Graph (DAG) is a linear ordering of vertices such that for every directed edge u-v, vertex u comes before v in the ordering.
+    </p>
+    <p>
+      It's widely used in scenarios like scheduling tasks, course prerequisite planning, or determining build orders in systems where some tasks must happen before others.
+    </p>
+    <p>
+      In DFS, we print a vertex and then recursively call DFS for its adjacent vertices.
+    </p>
+    <p>
+      Time Complexity: O(V+E). The above algorithm is simply DFS with an extra stack. So time complexity is the same as DFS.
+    </p>
+
+    <div class="graph-container" id="graphContainer"></div>
+
+    <button class="step-btn" onclick="nextStep()">Next Step</button>
+    <button class="step-btn" onclick="resetSort()">Reset</button>
+
+    <p id="explanation"></p>
+
+    <script>
+      const nodes = {
+        A: { x: 100, y: 50 },
+        B: { x: 250, y: 0 },
+        C: { x: 250, y: 100 },
+        D: { x: 400, y: 50 }
+      };
+
+      const edges = [
+        ['A', 'B'],
+        ['A', 'C'],
+        ['B', 'D'],
+        ['C', 'D']
+      ];
+
+      const order = ['A', 'B', 'C', 'D'];
+      let stepIndex = 0;
+
+      function drawGraph() {
+        const container = document.getElementById('graphContainer');
+        container.innerHTML = '';
+
+        // Draw edges
+        edges.forEach(([from, to]) => {
+          const x1 = nodes[from].x + 20;
+          const y1 = nodes[from].y + 20;
+          const x2 = nodes[to].x + 20;
+          const y2 = nodes[to].y + 20;
+          const length = Math.hypot(x2 - x1, y2 - y1);
+          const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+          const edge = document.createElement('div');
+          edge.className = 'edge';
+          edge.style.width = length + 'px';
+          edge.style.left = x1 + 'px';
+          edge.style.top = y1 + 'px';
+          edge.style.transform = `rotate(${angle}deg)`;
+
+          container.appendChild(edge);
+        });
+
+        // Draw nodes
+        Object.keys(nodes).forEach(id => {
+          const div = document.createElement('div');
+          div.className = 'node';
+          div.textContent = id;
+          div.style.left = nodes[id].x + 'px';
+          div.style.top = nodes[id].y + 'px';
+          container.appendChild(div);
+        });
+      }
+
+      function nextStep() {
+        const explanation = document.getElementById('explanation');
+        if (stepIndex >= order.length) {
+          explanation.textContent = 'Topological sort is complete! All nodes are in correct order respecting dependencies.';
+          return;
+        }
+
+        const current = order[stepIndex];
+        explanation.textContent = `Processing node ${current}. All its prerequisites have been completed.`;
+
+        const nodesEls = document.querySelectorAll('.node');
+        nodesEls.forEach(node => {
+          if (node.textContent === current) {
+            node.style.background = '#ffcc33';
+            node.style.color = '#222';
+          }
+        });
+
+        stepIndex++;
+      }
+
+      function resetSort() {
+        stepIndex = 0;
+        document.getElementById('explanation').textContent = '';
+        drawGraph();
+      }
+
+      drawGraph();
+    </script>
+  </div>
+</body>
+</html>

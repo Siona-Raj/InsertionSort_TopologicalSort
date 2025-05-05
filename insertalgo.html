@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Insertion Sort Algorithm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #d3d3d3;
+      color: #333;
+      font-family: 'Fira Code', monospace;
+      padding: 2rem;
+      font-size: 1rem;
+    }
+
+    .keyword { color: #569CD6; }
+    .function { color: #DCDCAA; }
+    .variable { color: #9CDCFE; }
+    .number { color: #B5CEA8; }
+    .comment { color: #6A9955; font-style: italic; }
+
+    .code-box {
+      background-color: #2e2e2e;
+      color: #d4d4d4;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>Insertion Sort - Pseudocode</h2>
+  <div class="code-box">
+    <pre><code>
+<span class="function">insertionSort</span>(<span class="variable">A</span>):
+    <span class="keyword">for</span> <span class="variable">i</span> ← <span class="number">1</span> <span class="keyword">to</span> <span class="function">length</span>(<span class="variable">A</span>) - <span class="number">1</span>:
+        <span class="variable">key</span> ← <span class="variable">A</span>[<span class="variable">i</span>]
+        <span class="variable">j</span> ← <span class="variable">i</span> - <span class="number">1</span>
+
+        <span class="keyword">while</span> <span class="variable">j</span> ≥ <span class="number">0</span> <span class="keyword">and</span> <span class="variable">A</span>[<span class="variable">j</span>] > <span class="variable">key</span>:
+            <span class="variable">A</span>[<span class="variable">j</span> + <span class="number">1</span>] ← <span class="variable">A</span>[<span class="variable">j</span>]
+            <span class="variable">j</span> ← <span class="variable">j</span> - <span class="number">1</span>
+
+        <span class="variable">A</span>[<span class="variable">j</span> + <span class="number">1</span>] ← <span class="variable">key</span>
+    </code></pre>
+  </div>
+
+  <h3>Explanation</h3>
+  <p>
+    The insertion sort algorithm builds the sorted array one item at a time:
+    <ul>
+      <li>Start from the second element, assume the first element is already sorted.</li>
+      <li>Compare the current element (key) with those before it.</li>
+      <li>Shift larger elements to the right to make space for the key.</li>
+      <li>Insert the key in its correct sorted position.</li>
+      <li>Repeat for all elements until the array is sorted.</li>
+    </ul>
+  </p>
+</body>
+</html>
